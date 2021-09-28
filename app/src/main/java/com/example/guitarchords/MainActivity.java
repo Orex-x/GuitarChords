@@ -23,8 +23,7 @@ public class MainActivity extends AppCompatActivity {
             R.raw.a, R.raw.c, R.raw.e, R.raw.d,R.raw.am, R.raw.dm,
             R.raw.em, R.raw.g,R.raw.a7,R.raw.g7,R.raw.e7,R.raw.c7
     };
-    private int points = 0;
-    private int currentSound, ii;
+    private int currentSound, gameProgress, points = 0, currentSizeList = 12;
     private ArrayList<Integer> soundsLvl = new ArrayList<>();
     Button btnPlay, btnRepeat, btnChangeLvl;
     String[] lvls = new String[]{"easy", "normal", "hard"};
@@ -39,23 +38,21 @@ public class MainActivity extends AppCompatActivity {
     //играем игру
     public void play(View v){
         points = 0;
-        ii = 0;
-        currentSound = soundsLvl.get(ii);
-        txtPoints.setText("Очки : " + points);
+        gameProgress = 0;
+        updateRandomListSound(currentSizeList);
+        currentSound = soundsLvl.get(gameProgress);
+        txtPoints.setText("points : " + points);
         btnChangeLvl.setEnabled(false);
         playSound(currentSound + 1);
     }
 
     //изменение уровня сложности
     public void changeLvl(View v){
-        soundsLvl.clear();
         String lvl = ((Button)v).getText().toString();
         for(int i = 0; i < 3; i++){
             if(lvl.equals(lvls[i])){
                 if(i == 2) ((Button)v).setText(lvls[0]);
-                else {
-                    ((Button)v).setText(lvls[i + 1]);
-                }
+                else ((Button)v).setText(lvls[i + 1]);
             }
         }
 
@@ -65,54 +62,46 @@ public class MainActivity extends AppCompatActivity {
 
         switch (((Button)v).getText().toString()){
             case "easy": {
-                for(int i = 4; i < 12; i++){
-                    buttons[i].setEnabled(false);
-                }
-
-                for(int i = 0; i < 4; i++){
-                    int rand = (int) (Math.random() * 4);
-                    soundsLvl.add(rand);
-                }
+                currentSizeList = 4;
                 break;
             }
             case "normal": {
-                for(int i = 8; i < 12; i++){
-                    buttons[i].setEnabled(false);
-                }
-                for(int i = 0; i < 8; i++){
-                    int rand = (int) (Math.random() * 8);
-                    soundsLvl.add(rand);
-                }
+                currentSizeList = 8;
                 break;
             } case "hard": {
-                for(int i = 0; i < 12; i++){
-                    int rand = (int) (Math.random() * 12);
-                    soundsLvl.add(rand);
-                }
+                currentSizeList = 12;
                 break;
             }
         }
     }
 
+    private void updateRandomListSound(int size){
+        soundsLvl.clear();
+        for(int i = 0; i < size; i++){
+            int rand = (int) (Math.random() * size);
+            soundsLvl.add(rand);
+        }
+        for(int i = size; i < 12; i++)
+            buttons[i].setEnabled(false);
+    }
+
 
     //обработчик нажатия на кнопку
     public void btnClick(View v){
-
         String txt = ((Button) v).getTag().toString();
         if(currentSound == (Integer.parseInt(txt))){
             points++;
-            txtPoints.setText("Очки : " + points);
+            txtPoints.setText("points : " + points);
         }
-        if((soundsLvl.size() - 1) == ii){
+        if((soundsLvl.size() - 1) == gameProgress){
             // Toast.makeText(MainActivity.this, "вы набрали " + points + " очков", Toast.LENGTH_SHORT).show();
             btnChangeLvl.setEnabled(true);
             currentSound = -1;
         }else{
-            ii++;
-            currentSound = soundsLvl.get(ii);
+            gameProgress++;
+            currentSound = soundsLvl.get(gameProgress);
             playSound(currentSound + 1);
         }
-
     }
 
 
@@ -128,8 +117,6 @@ public class MainActivity extends AppCompatActivity {
         playSound(Integer.parseInt(txt) + 1);
     }
 */
-
-
     public void playSound(int mSoundId){
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         float curVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -167,9 +154,6 @@ public class MainActivity extends AppCompatActivity {
         for (int idSound : sounds)
             mSoundPool.load(this, idSound, 1);
 
-        for(int i = 0; i < 12; i++){
-            int rand = (int) (Math.random() * 12);
-            soundsLvl.add(rand);
-        }
+        updateRandomListSound(currentSizeList);
     }
 }
